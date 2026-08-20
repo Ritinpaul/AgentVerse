@@ -1,0 +1,34 @@
+target-version = "py311"
+line-length = 120
+
+[lint]
+ignore = [
+    "E501",   # Line too long
+    "E402",   # Module level import not at top of file
+    "E741",   # Ambiguous variable name
+    "E712",   # Comparison to True/False (SQLAlchemy query expressions)
+    "F401",   # Unused imports
+    "F841",   # Unused variable
+    "B008",   # Do not perform function call in argument defaults (FastAPI Depends)
+    "B904",   # Within an except clause, raise exceptions with from err
+    "B018",   # Found useless expression
+    "B005",   # Using .strip() with multi-character strings
+    "B007",   # Loop control variable not used
+    "I001",   # Import block is un-sorted
+    "UP017",  # Use datetime.timezone.utc
+    "UP007",  # Use X | Y for type annotations
+    "UP038",  # Use X | Y in isinstance
+    "UP035",  # Deprecated import
+    "SIM105", # Use contextlib.suppress
+    "SIM118", # Use key in dict instead of key in dict.keys()
+    "SIM102", # Nested if statements
+    "SIM103", # Return condition directly
+    "SIM117", # Multiple with statements
+    "RUF001", # Ambiguous unicode character
+    "RUF002", # Ambiguous unicode character in docstring
+    "RUF003", # Ambiguous unicode character in comment
+    "RUF010", # Explicit f-string type conversion
+    "RUF012", # Mutable class attributes
+    "RUF013", # Implicit Optional
+    "RUF100", # Unused noqa
+]
