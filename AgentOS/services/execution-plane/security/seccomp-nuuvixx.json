@@ -1,0 +1,53 @@
+{
+  "defaultAction": "SCMP_ACT_ALLOW",
+  "architectures": [
+    "SCMP_ARCH_X86_64",
+    "SCMP_ARCH_X86",
+    "SCMP_ARCH_AARCH64",
+    "SCMP_ARCH_ARM"
+  ],
+  "syscalls": [
+    {
+      "names": [
+        "acct",
+        "add_key",
+        "bpf",
+        "chroot",
+        "delete_module",
+        "finit_module",
+        "init_module",
+        "iopl",
+        "ioperm",
+        "kexec_file_load",
+        "kexec_load",
+        "keyctl",
+        "lookup_dcookie",
+        "mount",
+        "perf_event_open",
+        "pivot_root",
+        "process_vm_readv",
+        "process_vm_writev",
+        "ptrace",
+        "reboot",
+        "request_key",
+        "setns",
+        "swapon",
+        "swapoff",
+        "sysfs",
+        "umount",
+        "umount2",
+        "unshare",
+        "uselib",
+        "userfaultfd",
+        "ustat",
+        "vm86",
+        "vm86old"
+      ],
+      "action": "SCMP_ACT_ERRNO",
+      "args": [],
+      "comment": "Nuuvixx Hardened Sandbox Policy: Prevent container escape, namespace manipulation, privilege escalation, and kernel tampering",
+      "includes": {},
+      "excludes": {}
+    }
+  ]
+}
