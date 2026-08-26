@@ -1,0 +1,18 @@
+{
+    "servers": [
+        {
+            "id": "mcp-sqlite-pool",
+            "name": "sqlite",
+            "description": "Shared SQLite database tool",
+            "url": "http://mcp-sqlite:8000/jsonrpc",
+            "capabilities": ["query", "schema"]
+        },
+        {
+            "id": "mcp-websearch-pool",
+            "name": "websearch",
+            "description": "Shared Web Search tool",
+            "url": "http://mcp-websearch:8000/jsonrpc",
+            "capabilities": ["search"]
+        }
+    ]
+}

@@ -1,0 +1,93 @@
+version: '3.8'
+
+services:
+  postgres:
+    image: postgres:16-alpine
+    environment:
+      POSTGRES_USER: agentos
+      POSTGRES_PASSWORD: agentos_secret
+      POSTGRES_DB: agentos_db
+    ports:
+      - "5433:5432"  # Exposed on 5433 to avoid collision with AgentGovern
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U agentos -d agentos_db"]
+      interval: 5s
+      timeout: 5s
+      retries: 5
+
+  redis:
+    image: redis:7-alpine
+    ports:
+      - "26379:6379"  # Exposed on 26379 to avoid collisions
+    volumes:
+      - redis_data:/data
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 5s
+      timeout: 5s
+      retries: 5
+
+  control-plane:
+    build: 
+      context: ../services/control-plane
+      dockerfile: Dockerfile
+    ports:
+      - "8010:8000"
+    environment:
+      - DATABASE_URL=postgresql+asyncpg://agentos:agentos_secret@postgres:5432/agentos_db
+      - ENVIRONMENT=local
+    depends_on:
+      postgres:
+        condition: service_healthy
+    volumes:
+      - ../services/control-plane:/app
+
+  execution-plane:
+    build:
+      context: ../services/execution-plane
+      dockerfile: Dockerfile
+    ports:
+      - "8011:8000"
+    environment:
+      - CONTROL_PLANE_URL=http://control-plane:8000
+      - ENVIRONMENT=local
+      - NUUVIXX_API_KEY=dev-nuuvixx-svc-key-2026
+    volumes:
+      - ../services/execution-plane:/app
+      # In production, use docker-socket-proxy to restrict docker API calls
+      - /var/run/docker.sock:/var/run/docker.sock:ro
+
+  state-plane:
+    build:
+      context: ../services/state-plane
+    ports:
+      - "8012:8000"
+    environment:
+      - REDIS_HOST=redis
+      - REDIS_PORT=6379
+    depends_on:
+      - redis
+
+  network-plane:
+    build:
+      context: ../services/network-plane
+    ports:
+      - "8013:8000"
+    depends_on:
+      - state-plane
+
+  mcp-sqlite:
+    image: mcp/sqlite:latest
+    container_name: agentos-mcp-sqlite
+    restart: unless-stopped
+    environment:
+      - SQLITE_DB_PATH=/data/mcp_database.db
+    volumes:
+      - mcp_data:/data
+
+volumes:
+  postgres_data:
+  redis_data:
+  mcp_data:
