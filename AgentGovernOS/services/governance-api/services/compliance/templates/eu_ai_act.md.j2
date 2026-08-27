@@ -1,0 +1,32 @@
+# EU AI Act Compliance Report
+
+**Generated At**: {{ generated_at }}
+**Scope**: {{ scope }}
+**Total Decisions Evaluated**: {{ total_decisions }}
+
+## High-Risk System Assessment
+{% if has_high_risk %}
+**WARNING**: High-risk AI system components detected.
+- Article 10 (Data Governance): Covered via Immutable Audit Ledger.
+- Article 11 (Technical Documentation): See attached policy versions.
+- Article 14 (Human Oversight): Overrides available in AgentGovernOS.
+
+**Flagged High-Risk Agents:**
+{% for agent in high_risk_agents %}
+- DID: `{{ agent.did }}` - Role: {{ agent.role }}
+{% endfor %}
+{% else %}
+No high-risk AI system components detected within the evaluated scope.
+{% endif %}
+
+## Incident Log
+Total Escalations: {{ total_escalations }}
+Total Policy Violations: {{ total_violations }}
+
+### Notable Violations
+{% for v in violations[:5] %}
+- **{{ v.timestamp }}**: Agent `{{ v.agent_did }}` violated policy `{{ v.policy_code }}`. Action taken: {{ v.action }}.
+{% endfor %}
+
+## Attestation
+This report is generated automatically by AgentGovernOS based on cryptographically verifiable ledger entries.
