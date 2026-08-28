@@ -1,0 +1,142 @@
+# ============================================================
+# AgentGovern OS — .gitignore
+# ============================================================
+
+# ── Python ───────────────────────────────────────────────────
+__pycache__/
+*.py[cod]
+*$py.class
+*.so
+*.pyd
+*.pyo
+
+# Distribution / packaging
+.Python
+build/
+develop-eggs/
+dist/
+eggs/
+.eggs/
+lib/
+lib64/
+parts/
+sdist/
+var/
+wheels/
+*.egg-info/
+*.egg
+MANIFEST
+
+# Virtual environments
+.venv/
+venv/
+env/
+ENV/
+__pypackages__/
+
+# Type checkers
+.pyre/
+.pytype/
+.mypy_cache/
+.dmypy.json
+
+# Testing & coverage
+.pytest_cache/
+.coverage
+.coverage.*
+coverage.xml
+htmlcov/
+.tox/
+nosetests.xml
+test_output.txt
+all_tests.txt
+all_tests2.txt
+fail.txt
+
+# ── Secrets & Environment ────────────────────────────────────
+.env
+.env.*
+!.env.example
+*.key
+*.pem
+*.cert
+*.p12
+*.pfx
+secrets/
+vault_tokens/
+
+# ── Node.js / TypeScript ─────────────────────────────────────
+node_modules/
+.npm/
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+pnpm-debug.log*
+.yarn/cache
+.yarn/unplugged
+.yarn/build-state.yml
+.pnp.*
+dist/
+*.tsbuildinfo
+
+# ── Databases & Local Data ───────────────────────────────────
+*.db
+*.sqlite3
+data/
+*.dump
+*.sql.gz
+pgdata/
+
+# ── Docker & Infrastructure ──────────────────────────────────
+# Keep docker-compose.yml but ignore local overrides
+docker-compose.override.yml
+docker-compose.local.yml
+.docker/
+
+# ── IDE & Editor ─────────────────────────────────────────────
+.idea/
+.vscode/
+*.swp
+*.swo
+*~
+.project
+.classpath
+.settings/
+
+# ── OS Generated ─────────────────────────────────────────────
+.DS_Store
+.DS_Store?
+._*
+.Spotlight-V100
+.Trashes
+ehthumbs.db
+Thumbs.db
+desktop.ini
+
+# ── Logs & Output ────────────────────────────────────────────
+*.log
+logs/
+*.out
+
+# ── Benchmarks & Profiling ───────────────────────────────────
+benchmarks/results/
+*.prof
+*.lprof
+
+# ── Alembic (keep migrations, ignore generated temp) ─────────
+# alembic.ini is committed; only ignore auto-generated temp files
+alembic_temp/
+
+# ── Pyright / Linting cache ──────────────────────────────────
+pyrightconfig.json.bak
+.ruff_cache/
+
+# ── Frontend build artifacts ─────────────────────────────────
+frontend/dist/
+frontend/build/
+frontend/.next/
+
+# ── Misc ─────────────────────────────────────────────────────
+*.bak
+*.tmp
+*.temp

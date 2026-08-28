@@ -1,0 +1,8 @@
+- id: agentgovern-scan
+  name: AgentGovern Policy Scan
+  description: "Runs AgentGovern OS local static scan against agent configurations"
+  entry: agentgovern scan --ci --fail-on medium --no-codeprint
+  language: python
+  types: [yaml]
+  files: "agentgovern.yaml|.*\\.agent\\.yaml"
+  pass_filenames: false

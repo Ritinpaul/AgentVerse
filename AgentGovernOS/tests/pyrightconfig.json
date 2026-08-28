@@ -1,0 +1,13 @@
+{
+  "include": ["."],
+  "extraPaths": [
+    "../services/governance-api",
+    "../services/governance-api/sap-btp-adapter"
+  ],
+  "venvPath": "..",
+  "venv": ".venv",
+  "pythonVersion": "3.11",
+  "typeCheckingMode": "basic",
+  "reportMissingImports": "warning",
+  "reportMissingModuleSource": "warning"
+}

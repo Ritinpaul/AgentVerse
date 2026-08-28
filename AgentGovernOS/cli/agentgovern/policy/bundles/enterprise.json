@@ -1,0 +1,67 @@
+{
+    "name": "enterprise",
+    "version": "1.0",
+    "description": "Strict enterprise governance policy. Includes all default rules plus strict tier ceiling, denied actions, and platform binding requirements.",
+    "rules": [
+        {
+            "id": "AG-001",
+            "name": "At Least One Agent Defined",
+            "check": "AT_LEAST_ONE_AGENT",
+            "severity": "MEDIUM"
+        },
+        {
+            "id": "AG-002",
+            "name": "All Agents Must Have Tiers",
+            "check": "REQUIRE_TIERING",
+            "severity": "HIGH"
+        },
+        {
+            "id": "AG-003",
+            "name": "All Agents Must Have Authority Limits",
+            "check": "AUTHORITY_LIMIT_SET",
+            "severity": "HIGH"
+        },
+        {
+            "id": "AG-004",
+            "name": "No Wildcard Tool Access",
+            "check": "NO_WILDCARD_ACTIONS",
+            "severity": "CRITICAL"
+        },
+        {
+            "id": "AG-005",
+            "name": "No Hardcoded Secrets",
+            "check": "NO_HARDCODED_SECRETS",
+            "severity": "CRITICAL"
+        },
+        {
+            "id": "AG-E01",
+            "name": "Authority Limits Must Not Exceed Tier Ceilings",
+            "description": "Each tier has a maximum allowed authority_limit. Exceeding the ceiling is a governance violation.",
+            "check": "MAX_AUTHORITY_PER_TIER",
+            "severity": "HIGH",
+            "params": {
+                "ceilings": {
+                    "T0": 9999999999,
+                    "T1": 1000000,
+                    "T2": 100000,
+                    "T3": 10000,
+                    "T4": 500
+                }
+            }
+        },
+        {
+            "id": "AG-E02",
+            "name": "All Agents Must Have Denied Actions",
+            "description": "Enterprise policy requires an explicit blocklist of actions for every agent.",
+            "check": "REQUIRE_DENIED_ACTIONS",
+            "severity": "MEDIUM"
+        },
+        {
+            "id": "AG-E03",
+            "name": "All Agents Must Have Platform Bindings",
+            "description": "Agents must be scoped to specific systems to prevent lateral movement.",
+            "check": "REQUIRE_PLATFORM_BINDINGS",
+            "severity": "MEDIUM"
+        }
+    ]
+}

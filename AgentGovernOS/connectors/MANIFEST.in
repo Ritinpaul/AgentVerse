@@ -1,0 +1,17 @@
+# Include package data
+include README.md
+include LICENSE
+include pyproject.toml
+include setup.py
+
+# Include all Python files
+recursive-include connectors *.py
+
+# Include type stubs if any
+recursive-include connectors *.pyi
+
+# Exclude tests from the package
+recursive-exclude tests *
+recursive-exclude * __pycache__
+recursive-exclude * *.py[co]
+recursive-exclude * .DS_Store

@@ -1,0 +1,42 @@
+version: "1.0"
+project: "MyApp"
+governance:
+  policy_bundle: "enterprise"
+  compliance: ["EU_AI_ACT"]
+
+agents:
+  # A high-privilege executive agent
+  - code: "EXEC-001"
+    name: "Chief Strategy Agent"
+    framework: "crewai"
+    tier: "T1"
+    authority_limit: 500000.00
+    currency: "USD"
+    allowed_actions:
+      - read_financials
+      - approve_budget
+      - reallocate_resources
+    denied_actions:
+      - wire_transfer
+      - fire_employee
+    platform_bindings:
+      - "SAP_S4HANA"
+    risk_tolerance: "low"
+
+  # A standard operational agent
+  - code: "SUPPORT-002"
+    name: "Customer Support Bot"
+    framework: "langchain"
+    tier: "T3"
+    authority_limit: 100.00
+    currency: "USD"
+    allowed_actions:
+      - read_kb
+      - send_email
+      - issue_refund_under_100
+    denied_actions:
+      - delete_account
+      - modify_pricing
+    platform_bindings:
+      - "Salesforce"
+    risk_tolerance: "medium"

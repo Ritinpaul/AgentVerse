@@ -1,0 +1,6 @@
+{
+    "extraPaths": [
+        "services/governance-api",
+        "services/identity-service"
+    ]
+}

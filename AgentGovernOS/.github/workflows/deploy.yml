@@ -1,0 +1,18 @@
+name: deploy-demo
+
+on:
+  workflow_dispatch:
+
+jobs:
+  deploy-readiness:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Compose smoke test
+        run: |
+          docker compose up -d postgres redis chromadb
+          sleep 20
+          docker compose ps
+      - name: Tear down
+        if: always()
+        run: docker compose down -v

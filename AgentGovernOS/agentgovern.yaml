@@ -1,0 +1,21 @@
+version: "1.0"
+project: "AgentGovernOS"
+governance:
+  policy_bundle: "default"
+  compliance: []
+
+agents:
+  - code: "AgentGovern"
+    name: "T3"
+    framework: "crewai"
+    tier: "2000"
+    authority_limit: 10000.00
+    currency: "USD"
+    allowed_actions:
+      - read_data
+      - write_report
+    denied_actions:
+      - delete_records
+      - wire_transfer
+    platform_bindings: []
+    risk_tolerance: "medium"

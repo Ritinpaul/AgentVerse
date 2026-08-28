@@ -1,0 +1,54 @@
+name: "AgentGovern OS Compliance Scan"
+description: "Runs AgentGovern OS static policy analysis on agent configurations and source code"
+
+inputs:
+  project-path:
+    description: "Path to the project to scan"
+    required: false
+    default: "."
+  policy-bundle:
+    description: "Policy bundle to enforce (e.g., default, enterprise)"
+    required: false
+    default: "default"
+  fail-on:
+    description: "Fail the build on violations of this severity (low, medium, high, critical)"
+    required: false
+    default: "high"
+  output-format:
+    description: "Output format for the report (table, json, sarif, html)"
+    required: false
+    default: "sarif"
+  output-file:
+    description: "File to save the report to"
+    required: false
+    default: "agentgovern-report.sarif"
+  server-url:
+    description: "Governance API server URL for remote sync (optional)"
+    required: false
+
+runs:
+  using: "composite"
+  steps:
+    - name: Install AgentGovern CLI
+      shell: bash
+      run: pip install agentgovern
+
+    - name: Run AgentGovern Scan
+      shell: bash
+      run: |
+        CMD="agentgovern scan ${{ inputs.project-path }} \
+          --policy-bundle ${{ inputs.policy-bundle }} \
+          --fail-on ${{ inputs.fail-on }} \
+          --format ${{ inputs.output-format }} \
+          --ci"
+        
+        if [ -n "${{ inputs.output-file }}" ]; then
+          CMD="$CMD --output ${{ inputs.output-file }}"
+        fi
+        
+        if [ -n "${{ inputs.server-url }}" ]; then
+          CMD="$CMD --server ${{ inputs.server-url }}"
+        fi
+        
+        echo "Running: $CMD"
+        eval $CMD

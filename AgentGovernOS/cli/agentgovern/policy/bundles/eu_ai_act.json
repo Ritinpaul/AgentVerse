@@ -1,0 +1,68 @@
+{
+    "name": "eu_ai_act",
+    "version": "1.0",
+    "description": "EU AI Act compliance checks — Articles 9 (Risk Management), 13 (Transparency), 14 (Human Oversight). High-risk AI systems require documented authority limits, explicit tiers, platform constraints, and no secrets.",
+    "rules": [
+        {
+            "id": "AG-001",
+            "name": "At Least One Agent Defined",
+            "check": "AT_LEAST_ONE_AGENT",
+            "severity": "MEDIUM"
+        },
+        {
+            "id": "EU-AIA-9-1",
+            "name": "[Art. 9] Risk Management: Tier Classification",
+            "description": "EU AI Act Article 9 requires a documented risk classification system. Agent tiers serve as risk classifiers.",
+            "check": "REQUIRE_TIERING",
+            "severity": "HIGH"
+        },
+        {
+            "id": "EU-AIA-9-2",
+            "name": "[Art. 9] Risk Management: Authority Limits",
+            "description": "AI systems in high-risk categories must have bounded operational authority.",
+            "check": "AUTHORITY_LIMIT_SET",
+            "severity": "HIGH"
+        },
+        {
+            "id": "EU-AIA-13-1",
+            "name": "[Art. 13] Transparency: Platform Bindings",
+            "description": "AI systems must transparently declare which systems they interact with.",
+            "check": "REQUIRE_PLATFORM_BINDINGS",
+            "severity": "HIGH"
+        },
+        {
+            "id": "EU-AIA-14-1",
+            "name": "[Art. 14] Human Oversight: Denied Actions",
+            "description": "Systems must have explicit action denylists to facilitate human oversight and intervention.",
+            "check": "REQUIRE_DENIED_ACTIONS",
+            "severity": "HIGH"
+        },
+        {
+            "id": "EU-AIA-SEC-1",
+            "name": "[Security] No Hardcoded Secrets",
+            "check": "NO_HARDCODED_SECRETS",
+            "severity": "CRITICAL"
+        },
+        {
+            "id": "EU-AIA-SEC-2",
+            "name": "[Security] No Wildcard Tool Access",
+            "check": "NO_WILDCARD_ACTIONS",
+            "severity": "CRITICAL"
+        },
+        {
+            "id": "EU-AIA-9-3",
+            "name": "[Art. 9] Authority Ceiling Enforcement",
+            "check": "MAX_AUTHORITY_PER_TIER",
+            "severity": "HIGH",
+            "params": {
+                "ceilings": {
+                    "T0": 9999999999,
+                    "T1": 500000,
+                    "T2": 50000,
+                    "T3": 5000,
+                    "T4": 200
+                }
+            }
+        }
+    ]
+}

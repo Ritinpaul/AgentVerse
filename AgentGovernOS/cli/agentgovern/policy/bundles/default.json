@@ -1,0 +1,42 @@
+{
+    "name": "default",
+    "version": "1.0",
+    "description": "Sensible defaults for any AI agent project. Checks the most critical governance requirements.",
+    "rules": [
+        {
+            "id": "AG-001",
+            "name": "At Least One Agent Defined",
+            "description": "The manifest must define at least one agent.",
+            "check": "AT_LEAST_ONE_AGENT",
+            "severity": "MEDIUM"
+        },
+        {
+            "id": "AG-002",
+            "name": "All Agents Must Have Tiers",
+            "description": "Every agent must have a tier (T0-T4) to enable authority ceiling enforcement.",
+            "check": "REQUIRE_TIERING",
+            "severity": "MEDIUM"
+        },
+        {
+            "id": "AG-003",
+            "name": "All Agents Must Have Authority Limits",
+            "description": "Every agent must declare an authority_limit to prevent uncontrolled spending or actions.",
+            "check": "AUTHORITY_LIMIT_SET",
+            "severity": "HIGH"
+        },
+        {
+            "id": "AG-004",
+            "name": "No Wildcard Tool Access",
+            "description": "Agents must not use wildcard (*) in allowed_actions — this grants unrestricted capabilities.",
+            "check": "NO_WILDCARD_ACTIONS",
+            "severity": "CRITICAL"
+        },
+        {
+            "id": "AG-005",
+            "name": "No Hardcoded Secrets",
+            "description": "API keys, tokens, and credentials must not be hardcoded in source files.",
+            "check": "NO_HARDCODED_SECRETS",
+            "severity": "CRITICAL"
+        }
+    ]
+}

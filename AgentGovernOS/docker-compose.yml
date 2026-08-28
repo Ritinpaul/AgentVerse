@@ -1,0 +1,172 @@
+version: "3.9"
+
+services:
+  # === Governance API (FastAPI) ===
+  api:
+    build:
+      context: ./services/governance-api
+      dockerfile: Dockerfile
+    ports:
+      - "8000:8000"
+    depends_on:
+      postgres:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+      chromadb:
+        condition: service_started
+    environment:
+      - DATABASE_URL=postgresql+asyncpg://agentgovern:secret@postgres:5432/agentgovern
+      - REDIS_URL=redis://redis:6379/0
+      - CHROMA_HOST=chromadb
+      - CHROMA_PORT=8000
+      - OLLAMA_BASE_URL=http://ollama:11434
+      - APP_ENV=development
+      - LOG_LEVEL=INFO
+    volumes:
+      - ./services/governance-api:/app
+    command: uvicorn main:app --host 0.0.0.0 --port 8000 --reload
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD", "python", "-c", "import urllib.request; urllib.request.urlopen('http://localhost:8000/health', timeout=3)"]
+      interval: 10s
+      timeout: 5s
+      retries: 6
+      start_period: 20s
+
+  # === SAP BTP Adapter (port 8002) ===
+  sap-btp-adapter:
+    build:
+      context: ./services/sap-btp-adapter
+      dockerfile: Dockerfile
+    ports:
+      - "8002:8002"
+    depends_on:
+      - api
+    environment:
+      - GOVERNANCE_API_URL=http://api:8000
+    volumes:
+      - ./services/sap-btp-adapter:/app
+    command: uvicorn main:app --host 0.0.0.0 --port 8002 --reload
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD", "python", "-c", "import urllib.request; urllib.request.urlopen('http://localhost:8002/health', timeout=3)"]
+      interval: 10s
+      timeout: 5s
+      retries: 6
+      start_period: 15s
+
+  # === CrewAI Agent Engine ===
+  crewai-engine:
+    build:
+      context: ./services/crewai-engine
+      dockerfile: Dockerfile
+    depends_on:
+      - api
+      - ollama
+    environment:
+      - GOVERNANCE_API_URL=http://api:8000
+      - OLLAMA_BASE_URL=http://ollama:11434
+      - REDIS_URL=redis://redis:6379/0
+    env_file:
+      - .env
+    volumes:
+      - ./services/crewai-engine:/app
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD", "python", "-c", "import urllib.request; urllib.request.urlopen('http://localhost:8001/health', timeout=3)"]
+      interval: 15s
+      timeout: 5s
+      retries: 6
+      start_period: 30s
+
+  # === Ollama (Local LLM) ===
+  ollama:
+    image: ollama/ollama:latest
+    ports:
+      - "11434:11434"
+    volumes:
+      - ollama_data:/root/.ollama
+    deploy:
+      resources:
+        reservations:
+          devices:
+            - driver: nvidia
+              count: all
+              capabilities: [gpu]
+    restart: unless-stopped
+
+  # === PostgreSQL + TimescaleDB ===
+  postgres:
+    image: timescale/timescaledb:latest-pg16
+    ports:
+      - "35432:5432"
+    volumes:
+      - pg_data:/var/lib/postgresql/data
+      - ./data/migrations/init.sql:/docker-entrypoint-initdb.d/01-init.sql
+    environment:
+      POSTGRES_DB: agentgovern
+      POSTGRES_USER: agentgovern
+      POSTGRES_PASSWORD: secret
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U agentgovern"]
+      interval: 5s
+      timeout: 5s
+      retries: 5
+    restart: unless-stopped
+
+  # === Redis ===
+  redis:
+    image: redis:7-alpine
+    ports:
+      - "36379:6379"
+    volumes:
+      - redis_data:/data
+    command: redis-server --appendonly yes
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 5s
+      timeout: 5s
+      retries: 5
+    restart: unless-stopped
+
+  # === ChromaDB (Vector Memory) ===
+  chromadb:
+    image: chromadb/chroma:latest
+    ports:
+      - "8001:8000"
+    volumes:
+      - chroma_data:/chroma/chroma
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD", "python", "-c", "import urllib.request; urllib.request.urlopen('http://localhost:8000/api/v1/heartbeat', timeout=3)"]
+      interval: 15s
+      timeout: 5s
+      retries: 8
+      start_period: 20s
+
+  # === Prometheus (Metrics) ===
+  prometheus:
+    image: prom/prometheus:latest
+    ports:
+      - "9090:9090"
+    volumes:
+      - ./infra/prometheus.yml:/etc/prometheus/prometheus.yml
+    restart: unless-stopped
+
+  # === Grafana (Dashboards) ===
+  grafana:
+    image: grafana/grafana:latest
+    ports:
+      - "3000:3000"
+    depends_on:
+      - prometheus
+    environment:
+      GF_SECURITY_ADMIN_PASSWORD: admin
+    restart: unless-stopped
+
+volumes:
+  pg_data:
+  redis_data:
+  chroma_data:
+  ollama_data:
