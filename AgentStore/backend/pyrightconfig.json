@@ -1,0 +1,11 @@
+{
+  "include": ["app", "tests"],
+  "exclude": ["**/node_modules", "**/__pycache__"],
+  "pythonVersion": "3.12",
+  "pythonPlatform": "Windows",
+  "venvPath": "D:/python3",
+  "extraPaths": ["D:/python3/Lib/site-packages"],
+  "typeCheckingMode": "basic",
+  "reportMissingImports": "information",
+  "reportMissingModuleSource": "none"
+}

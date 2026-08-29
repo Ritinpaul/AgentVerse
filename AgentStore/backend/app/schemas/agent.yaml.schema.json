@@ -1,0 +1,163 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "title": "AgentOS Agent Configuration",
+  "type": "object",
+  "required": ["name", "version", "description", "framework", "model"],
+  "properties": {
+    "name": {
+      "type": "string",
+      "description": "Unique name of the agent (e.g., 'sales-qualifier')"
+    },
+    "version": {
+      "type": "string",
+      "pattern": "^[0-9]+\\.[0-9]+\\.[0-9]+$",
+      "description": "Semantic version of the agent (e.g., '1.0.0')"
+    },
+    "description": {
+      "type": "string",
+      "description": "Natural language description of the agent's purpose"
+    },
+    "framework": {
+      "type": "string",
+      "enum": [
+        "langchain",
+        "crewai",
+        "pydantic-ai",
+        "smolagents",
+        "google-adk",
+        "semantic-kernel",
+        "native_agentos",
+        "custom"
+      ],
+      "description": "Underlying framework orchestrating the agent logic"
+    },
+    "model": {
+      "type": "object",
+      "required": ["provider", "name"],
+      "properties": {
+        "provider": {
+          "type": "string",
+          "enum": ["openai", "anthropic", "google", "ollama"],
+          "description": "LLM Provider"
+        },
+        "name": {
+          "type": "string",
+          "description": "Model name (e.g., 'gpt-4o', 'claude-3-5-sonnet')"
+        },
+        "temperature": {
+          "type": "number",
+          "minimum": 0,
+          "maximum": 2,
+          "default": 0.7
+        },
+        "max_tokens": {
+          "type": "integer",
+          "minimum": 1
+        }
+      }
+    },
+    "tools": {
+      "type": "array",
+      "description": "List of tools the agent has access to",
+      "items": {
+        "type": "object",
+        "required": ["type"],
+        "properties": {
+          "type": {
+            "type": "string",
+            "enum": ["mcp", "http", "native"]
+          },
+          "server": {
+            "type": "string",
+            "description": "MCP Server name (if type=mcp)"
+          },
+          "tool": {
+            "type": "string",
+            "description": "Specific tool name within the MCP server"
+          },
+          "url": {
+            "type": "string",
+            "description": "Endpoint URL (if type=http)"
+          }
+        },
+        "if": {
+          "properties": { "type": { "const": "mcp" } }
+        },
+        "then": {
+          "required": ["server", "tool"]
+        }
+      }
+    },
+    "policies": {
+      "type": "array",
+      "description": "AgentGovern OS Policies enforced on this agent",
+      "items": {
+        "type": "object",
+        "required": ["name"],
+        "properties": {
+          "name": {
+            "type": "string",
+            "description": "Policy name (e.g., 'no_direct_db_write')"
+          }
+        }
+      }
+    },
+    "memory": {
+      "type": "object",
+      "properties": {
+        "type": {
+          "type": "string",
+          "enum": ["ephemeral", "persistent", "semantic"],
+          "default": "ephemeral"
+        },
+        "max_tokens": {
+          "type": "integer"
+        }
+      }
+    },
+    "budget": {
+      "type": "object",
+      "properties": {
+        "max_tokens_per_run": {
+          "type": "integer"
+        },
+        "max_cost_per_run_usd": {
+          "type": "number"
+        },
+        "max_runs_per_day": {
+          "type": "integer"
+        }
+      }
+    },
+    "triggers": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "required": ["type"],
+        "properties": {
+          "type": {
+            "type": "string",
+            "enum": ["webhook", "schedule"]
+          },
+          "cron": {
+            "type": "string",
+            "description": "Cron expression for scheduled triggers"
+          }
+        }
+      }
+    },
+    "sandbox_tests": {
+      "type": "array",
+      "description": "Test cases evaluated before deployment",
+      "items": {
+        "type": "object",
+        "required": ["name", "input", "expected_behavior"],
+        "properties": {
+          "name": { "type": "string" },
+          "input": { "type": "string" },
+          "expected_behavior": { "type": "string", "description": "Natural language assertion of expected outcome" }
+        }
+      }
+    }
+  }
+}
