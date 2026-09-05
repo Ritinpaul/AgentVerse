@@ -1,0 +1,217 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "$id": "https://agentverse.io/schemas/agent.yaml",
+  "title": "AgentVerse Agent Manifest",
+  "description": "Schema for agent.yaml — the declarative manifest for AgentVerse agents",
+  "type": "object",
+  "required": ["name", "version", "runtime"],
+  "additionalProperties": false,
+  "properties": {
+    "name": {
+      "type": "string",
+      "description": "Unique agent name (slug format: lowercase, hyphens only)",
+      "pattern": "^[a-z0-9][a-z0-9-]*[a-z0-9]$",
+      "minLength": 3,
+      "maxLength": 64
+    },
+    "version": {
+      "type": "string",
+      "description": "Semantic version of this agent manifest",
+      "pattern": "^\\d+\\.\\d+\\.\\d+$"
+    },
+    "description": {
+      "type": "string",
+      "description": "Human-readable description of what this agent does",
+      "maxLength": 512
+    },
+    "author": {
+      "type": "string",
+      "description": "Agent author or organization slug"
+    },
+    "license": {
+      "type": "string",
+      "enum": ["MIT", "Apache-2.0", "GPL-3.0", "BSL-1.1", "Commercial", "Proprietary"],
+      "description": "License type for marketplace publishing"
+    },
+    "runtime": {
+      "type": "object",
+      "required": ["model"],
+      "description": "LLM runtime configuration",
+      "properties": {
+        "model": {
+          "type": "string",
+          "description": "Primary LLM model to use",
+          "enum": [
+            "gemini-2.5-pro",
+            "gemini-2.5-flash",
+            "gemini-2.0-flash",
+            "gpt-4o",
+            "gpt-4o-mini",
+            "claude-sonnet-4-5",
+            "claude-3-5-haiku",
+            "mistral-large",
+            "llama-3.3-70b"
+          ]
+        },
+        "fallback_model": {
+          "type": "string",
+          "description": "Fallback model if primary is unavailable or budget exceeded",
+          "enum": [
+            "gemini-2.0-flash",
+            "gpt-4o-mini",
+            "claude-3-5-haiku",
+            "gemini-2.5-flash"
+          ]
+        },
+        "max_tokens": {
+          "type": "integer",
+          "description": "Maximum tokens per LLM call",
+          "minimum": 256,
+          "maximum": 128000
+        },
+        "timeout_seconds": {
+          "type": "integer",
+          "description": "Hard timeout for agent execution",
+          "minimum": 5,
+          "maximum": 3600
+        },
+        "temperature": {
+          "type": "number",
+          "description": "LLM temperature (0=deterministic, 2=creative)",
+          "minimum": 0,
+          "maximum": 2
+        }
+      }
+    },
+    "tools": {
+      "type": "array",
+      "description": "MCP tool servers this agent can call",
+      "items": {
+        "type": "object",
+        "required": ["name", "server", "scope"],
+        "properties": {
+          "name": {
+            "type": "string",
+            "description": "Tool function name called by the LLM"
+          },
+          "server": {
+            "type": "string",
+            "description": "MCP server URI (mcp://host/path format)",
+            "pattern": "^mcp://"
+          },
+          "scope": {
+            "type": "string",
+            "enum": ["read", "write", "read_write", "admin"],
+            "description": "Permission scope for GovernOS enforcement"
+          },
+          "description": {
+            "type": "string",
+            "description": "What this tool does (shown to LLM)"
+          }
+        }
+      }
+    },
+    "budget": {
+      "type": "object",
+      "description": "Cost and resource limits enforced by AgentOS",
+      "properties": {
+        "max_cost_per_run": {
+          "type": "number",
+          "description": "Maximum USD cost allowed per execution",
+          "minimum": 0.001,
+          "maximum": 100
+        },
+        "max_tokens_per_run": {
+          "type": "integer",
+          "description": "Maximum total tokens (input + output) per run",
+          "minimum": 1000,
+          "maximum": 1000000
+        },
+        "alert_threshold": {
+          "type": "number",
+          "description": "Fraction of budget that triggers an alert (0.0–1.0)",
+          "minimum": 0,
+          "maximum": 1
+        }
+      }
+    },
+    "governance": {
+      "type": "object",
+      "description": "GovernOS policy configuration",
+      "properties": {
+        "policy_set": {
+          "type": "string",
+          "enum": ["permissive", "standard", "enterprise-strict", "hipaa-compliant", "custom"],
+          "description": "Named policy ruleset from GovernOS"
+        },
+        "require_human_approval": {
+          "type": "boolean",
+          "description": "Require human-in-the-loop approval before destructive actions"
+        },
+        "allowed_tool_scopes": {
+          "type": "array",
+          "items": {
+            "type": "string",
+            "enum": ["read", "write", "read_write", "admin"]
+          },
+          "description": "Whitelist of tool scopes this agent may use"
+        },
+        "pii_scan": {
+          "type": "boolean",
+          "description": "Enable automatic PII detection and redaction (ASI03)"
+        },
+        "audit_level": {
+          "type": "string",
+          "enum": ["minimal", "standard", "verbose", "immutable"],
+          "description": "Audit logging verbosity"
+        }
+      }
+    },
+    "memory": {
+      "type": "object",
+      "description": "Agent memory and state configuration",
+      "properties": {
+        "type": {
+          "type": "string",
+          "enum": ["none", "session", "persistent", "distributed"],
+          "description": "Memory persistence strategy"
+        },
+        "backend": {
+          "type": "string",
+          "enum": ["redis", "postgres", "firestore", "memory"],
+          "description": "Storage backend for persistent memory"
+        },
+        "max_context_messages": {
+          "type": "integer",
+          "description": "Max conversation history to retain",
+          "minimum": 1,
+          "maximum": 1000
+        }
+      }
+    },
+    "a2a": {
+      "type": "object",
+      "description": "Agent-to-Agent commerce configuration",
+      "properties": {
+        "enabled": {
+          "type": "boolean",
+          "description": "Allow this agent to hire other agents via AgentStore"
+        },
+        "max_subagent_cost": {
+          "type": "number",
+          "description": "Max USD this agent may spend hiring sub-agents per run"
+        },
+        "allowed_agents": {
+          "type": "array",
+          "items": { "type": "string" },
+          "description": "Slug list of agents this agent is pre-approved to hire"
+        }
+      }
+    },
+    "tags": {
+      "type": "array",
+      "items": { "type": "string" },
+      "description": "Marketplace discovery tags"
+    }
+  }
+}
