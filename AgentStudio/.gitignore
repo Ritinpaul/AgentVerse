@@ -1,0 +1,31 @@
+# Dependencies
+node_modules/
+**/node_modules/
+
+# Build and output directories
+out/
+**/out/
+dist/
+**/dist/
+.vscode-test/
+**/.vscode-test/
+
+# Generated files & source maps
+*.js.map
+*.tsbuildinfo
+*.log
+
+# Generated compiled JS in webview src
+vscode-extension/webview/src/**/*.js
+
+# VS Code IDE settings & cache
+.vscode/
+**/.vscode/
+
+# Local environment & secrets
+.env
+.env.local
+
+# Operating System files
+.DS_Store
+Thumbs.db

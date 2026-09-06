@@ -1,0 +1,4 @@
+name: "CustomerSupportBot"
+description: "Autonomous L1 Support Bot"
+budget:
+  max_cost_per_run: 0.25

@@ -1,0 +1,51 @@
+[
+  {
+    "id": "audit_1784727996740",
+    "timestamp": "2026-07-22T13:46:36.740Z",
+    "actor": "Ritinpaul",
+    "action": "SSO_LOGIN",
+    "details": "GitHub"
+  },
+  {
+    "id": "audit_1784727992009",
+    "timestamp": "2026-07-22T13:46:32.009Z",
+    "actor": "user",
+    "action": "SSO_LOGOUT",
+    "details": "User logged out"
+  },
+  {
+    "id": "audit_1784727986238",
+    "timestamp": "2026-07-22T13:46:26.238Z",
+    "actor": "Ritinpaul",
+    "action": "SSO_LOGIN",
+    "details": "GitHub"
+  },
+  {
+    "id": "audit_1784720575232",
+    "timestamp": "2026-07-22T11:42:55.232Z",
+    "actor": "user",
+    "action": "SSO_LOGIN",
+    "details": "Google"
+  },
+  {
+    "id": "audit_1784720532646",
+    "timestamp": "2026-07-22T11:42:12.646Z",
+    "actor": "user",
+    "action": "GIT_COMMIT",
+    "details": "feat: Add sample agent"
+  },
+  {
+    "id": "audit_1784655895554",
+    "timestamp": "2026-07-21T17:44:55.554Z",
+    "actor": "user",
+    "action": "SAVE_POLICIES",
+    "details": "{\"minEvalScore\":90,\"maxCostPerRun\":0.5,\"requiresCISOApproval\":true}"
+  },
+  {
+    "id": "audit_1784655760056",
+    "timestamp": "2026-07-21T17:42:40.056Z",
+    "actor": "user",
+    "action": "SAVE_POLICIES",
+    "details": "{\"minEvalScore\":92,\"maxCostPerRun\":0.5,\"requiresCISOApproval\":true}"
+  }
+]

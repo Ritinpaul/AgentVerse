@@ -1,0 +1,46 @@
+name: finops-cost-optimizer
+slug: nuuvixx/finops-cost-optimizer
+version: 1.0.0
+description: Autonomous cloud cost management agent that inspects Kubernetes workload telemetry, flags idle compute nodes, calculates scale-to-zero savings, and drafts microVM snapshotting recommendations.
+author: Nuuvixx Cloud FinOps Labs
+category: Finance & Cloud Infra
+tags:
+  - finops
+  - cloud-cost
+  - kubernetes
+  - scale-to-zero
+  - cost-optimization
+
+model:
+  name: claude-3-5-sonnet-20241022
+  temperature: 0.2
+  max_tokens: 16384
+  fallback_model: gemini-2.5-pro
+
+tools:
+  - name: k8s_telemetry_collector
+    type: mcp
+    server: postgres
+    description: Inspects CPU and memory utilization metrics across Kubernetes clusters and node groups.
+  - name: idle_pod_detector
+    type: mcp
+    server: sequential-thinking
+    description: Identifies workloads operating under 5% CPU utilization for over 48 hours.
+  - name: scale_to_zero_planner
+    type: mcp
+    server: filesystem
+    description: Computes cost savings from microVM CRIU snapshotting and scale-to-zero scheduling.
+
+policies:
+  sandbox:
+    profile: strict
+    network_mode: egress_filtered
+  cost:
+    max_cost_per_run_usd: 1.00
+    alert_threshold_pct: 0.80
+
+capabilities:
+  - infra:analyze
+  - cost:optimize
+  - k8s:scale-to-zero
+  - billing:forecast

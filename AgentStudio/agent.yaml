@@ -1,0 +1,26 @@
+name: 'test-agent'
+version: '1.0.0'
+description: 'A test agent for Phase 2 validation'
+framework: langchain
+model:
+  provider: openai
+  name: gpt-4o
+  temperature: 0.7
+  max_tokens: 1000
+
+budget:
+  max_tokens_per_run: 50000
+  max_cost_per_run_usd: 0.50
+  max_runs_per_day: 100
+
+policies:
+  - name: 'no_shell_access'
+  - name: 'no_direct_db_write'
+
+tools:
+  - type: mcp
+    server: agentstore
+    tool: shell
+  - type: mcp
+    server: agentstore
+    tool: web-search

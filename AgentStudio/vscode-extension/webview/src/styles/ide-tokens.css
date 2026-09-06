@@ -1,0 +1,634 @@
+/**
+ * AgentVerse IDE — CSS Design Tokens & Global Styles
+ * Matches the Visual Design Reference exactly.
+ * Import this file first in every panel stylesheet.
+ */
+
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap');
+
+/* ── CSS Custom Properties ─────────────────────────────── */
+:root {
+  /* Background Layers — from reference image */
+  --av-bg-editor:        #0D0E14;  /* Monaco editor / active tab */
+  --av-bg-panel:         #090A10;  /* Activity bar, sidebar, terminal, status bar */
+  --av-bg-elevated:      #13141E;  /* Cards, hover rows */
+  --av-bg-card:          #12131B;  /* Cards inside panels */
+  --av-bg-input:         #0A0B11;  /* Input backgrounds */
+  --av-bg-overlay:       rgba(9, 10, 16, 0.92);
+
+  /* Borders — very subtle, like reference */
+  --av-border:           #1A1B26;  /* Primary separator */
+  --av-border-subtle:    #13141E;  /* Inner borders */
+  --av-border-focus:     rgba(99, 102, 241, 0.6);
+
+  /* Text */
+  --av-text-primary:     #C9D1D9;
+  --av-text-heading:     #E2E8F0;
+  --av-text-secondary:   #8B949E;
+  --av-text-muted:       #4A5568;
+  --av-text-link:        #6366F1;
+
+  /* Brand — Firebrick Red (#B22222) */
+  --av-crimson:          #B22222;
+  --av-crimson-dim:      #8B1A1A;
+  --av-crimson-alpha:    rgba(178, 34, 34, 0.12);
+  --av-crimson-glow:     rgba(178, 34, 34, 0.15);
+
+  /* Semantic Colors */
+  --av-emerald:          #10B981;
+  --av-emerald-dim:      #059669;
+  --av-emerald-alpha:    rgba(16, 185, 129, 0.12);
+  --av-indigo:           #6366F1;
+  --av-indigo-dim:       #4F52C9;
+  --av-indigo-alpha:     rgba(99, 102, 241, 0.15);
+  --av-amber:            #F59E0B;
+  --av-amber-alpha:      rgba(245, 158, 11, 0.12);
+  --av-violet:           #8B5CF6;
+  --av-violet-alpha:     rgba(139, 92, 246, 0.12);
+  --av-cyan:             #06B6D4;
+
+  /* Diff */
+  --av-diff-added:          rgba(16, 185, 129, 0.15);
+  --av-diff-added-border:   #10B981;
+  --av-diff-removed:        rgba(239, 68, 68, 0.15);
+  --av-diff-removed-border: #EF4444;
+
+  /* Typography */
+  --av-font-ui:    'Inter', -apple-system, BlinkMacSystemFont, system-ui, sans-serif;
+  --av-font-mono:  'JetBrains Mono', 'Cascadia Code', 'Fira Code', monospace;
+  --av-font-size-xs:   10px;
+  --av-font-size-sm:   11px;
+  --av-font-size-base: 13px;
+  --av-font-size-md:   14px;
+
+  /* Spacing */
+  --av-gap-xs:  4px;
+  --av-gap-sm:  8px;
+  --av-gap-md:  12px;
+  --av-gap-lg:  16px;
+  --av-gap-xl:  24px;
+
+  /* Radius */
+  --av-radius-sm: 4px;
+  --av-radius-md: 6px;
+  --av-radius-lg: 10px;
+
+  /* Shadows */
+  --av-shadow-sm: 0 1px 3px rgba(0, 0, 0, 0.5);
+  --av-shadow-md: 0 4px 16px rgba(0, 0, 0, 0.6);
+  --av-shadow-lg: 0 8px 32px rgba(0, 0, 0, 0.7);
+
+  /* Animation */
+  --av-ease:     cubic-bezier(0.4, 0, 0.2, 1);
+  --av-duration: 150ms;
+}
+
+/* ── Global Reset ──────────────────────────────────────── */
+*, *::before, *::after {
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
+}
+
+html, body, #root {
+  height: 100%;
+  background: var(--av-bg-panel);
+  color: var(--av-text-primary);
+  font-family: var(--av-font-ui);
+  font-size: var(--av-font-size-base);
+  line-height: 1.5;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+/* ── Custom Scrollbars — thin, dark, like the reference ── */
+::-webkit-scrollbar {
+  width: 6px;
+  height: 6px;
+}
+
+::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+::-webkit-scrollbar-thumb {
+  background: rgba(255, 255, 255, 0.15);
+  border-radius: 3px;
+  transition: background var(--av-duration) var(--av-ease);
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: rgba(178, 34, 34, 0.6);
+}
+
+::-webkit-scrollbar-corner {
+  background: transparent;
+}
+
+/* Firefox */
+* {
+  scrollbar-width: thin;
+  scrollbar-color: rgba(255, 255, 255, 0.15) transparent;
+}
+
+/* ── Section Labels — ALL CAPS like reference ─────────── */
+.av-section-label {
+  font-family: var(--av-font-ui);
+  font-size: var(--av-font-size-xs);
+  font-weight: 600;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: var(--av-text-muted);
+  padding: 12px 12px 4px;
+  user-select: none;
+}
+
+/* ── Nav Item — sidebar nav row like reference ─────────── */
+.av-nav-item {
+  display: flex;
+  align-items: center;
+  gap: var(--av-gap-sm);
+  padding: 5px 12px;
+  border-radius: var(--av-radius-sm);
+  cursor: pointer;
+  color: var(--av-text-secondary);
+  font-size: var(--av-font-size-base);
+  transition: background var(--av-duration) var(--av-ease),
+              color var(--av-duration) var(--av-ease);
+  text-decoration: none;
+  position: relative;
+}
+
+.av-nav-item:hover {
+  background: rgba(30, 32, 48, 0.6);
+  color: var(--av-text-heading);
+}
+
+.av-nav-item.av-nav-active {
+  background: rgba(225, 29, 72, 0.1);
+  color: var(--av-text-heading);
+}
+
+.av-nav-item.av-nav-active::before {
+  content: '';
+  position: absolute;
+  left: 0;
+  top: 4px;
+  bottom: 4px;
+  width: 2px;
+  background: var(--av-crimson);
+  border-radius: 1px;
+}
+
+.av-nav-item .av-nav-icon {
+  width: 16px;
+  height: 16px;
+  flex-shrink: 0;
+  opacity: 0.7;
+}
+
+.av-nav-item.av-nav-active .av-nav-icon {
+  opacity: 1;
+}
+
+/* ── Cards ─────────────────────────────────────────────── */
+.av-card {
+  background: var(--av-bg-elevated);
+  border: 1px solid var(--av-border);
+  border-radius: var(--av-radius-md);
+  padding: var(--av-gap-md);
+}
+
+.av-card-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding-bottom: var(--av-gap-sm);
+  border-bottom: 1px solid var(--av-border-subtle);
+  margin-bottom: var(--av-gap-md);
+}
+
+/* ── Buttons — matching reference [Apply] [Sign In] style ── */
+.av-btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: var(--av-gap-xs);
+  padding: 6px 14px;
+  border-radius: var(--av-radius-sm);
+  font-family: var(--av-font-mono);
+  font-size: var(--av-font-size-sm);
+  font-weight: 500;
+  letter-spacing: 0.02em;
+  cursor: pointer;
+  border: 1px solid transparent;
+  transition: background var(--av-duration) var(--av-ease),
+              border-color var(--av-duration) var(--av-ease),
+              color var(--av-duration) var(--av-ease);
+  user-select: none;
+  white-space: nowrap;
+  text-decoration: none;
+}
+
+.av-btn:active { opacity: 0.9; transform: scale(0.98); }
+
+.av-btn-primary {
+  background: var(--av-crimson);
+  color: #FFFFFF;
+  border-color: var(--av-crimson);
+}
+.av-btn-primary:hover {
+  background: var(--av-crimson-dim);
+  border-color: var(--av-crimson-dim);
+}
+
+.av-btn-secondary {
+  background: transparent;
+  color: var(--av-text-secondary);
+  border-color: var(--av-border);
+}
+.av-btn-secondary:hover {
+  background: var(--av-bg-elevated);
+  color: var(--av-text-primary);
+  border-color: #2D3148;
+}
+
+.av-btn-ghost {
+  background: transparent;
+  color: var(--av-text-muted);
+  border-color: transparent;
+}
+.av-btn-ghost:hover {
+  background: var(--av-bg-elevated);
+  color: var(--av-text-secondary);
+}
+
+.av-btn-danger {
+  background: rgba(239, 68, 68, 0.15);
+  color: #EF4444;
+  border-color: rgba(239, 68, 68, 0.3);
+}
+.av-btn-danger:hover {
+  background: rgba(239, 68, 68, 0.25);
+  border-color: #EF4444;
+}
+
+/* ── Badge / Chip — like READY, T2, AgentVerse Free pills ── */
+.av-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  padding: 2px 7px;
+  border-radius: 20px;
+  font-size: var(--av-font-size-xs);
+  font-weight: 600;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+  white-space: nowrap;
+}
+.av-badge-green    { background: var(--av-emerald-alpha); color: var(--av-emerald); border: 1px solid rgba(16,185,129,.25); }
+.av-badge-crimson  { background: var(--av-crimson-alpha); color: var(--av-crimson); border: 1px solid rgba(178,34,34,.25); }
+.av-badge-indigo   { background: var(--av-indigo-alpha); color: var(--av-indigo); border: 1px solid rgba(99,102,241,.25); }
+.av-badge-violet   { background: var(--av-violet-alpha); color: var(--av-violet); border: 1px solid rgba(139,92,246,.25); }
+.av-badge-amber    { background: var(--av-amber-alpha); color: var(--av-amber); border: 1px solid rgba(245,158,11,.25); }
+.av-badge-neutral  { background: rgba(45,49,72,.5); color: var(--av-text-secondary); border: 1px solid var(--av-border); }
+
+/* ── Input Fields ──────────────────────────────────────── */
+.av-input {
+  width: 100%;
+  background: var(--av-bg-input);
+  border: 1px solid var(--av-border);
+  border-radius: var(--av-radius-sm);
+  padding: 7px 10px;
+  font-family: var(--av-font-ui);
+  font-size: var(--av-font-size-base);
+  color: var(--av-text-primary);
+  outline: none;
+  transition: border-color var(--av-duration) var(--av-ease);
+}
+.av-input::placeholder { color: var(--av-text-muted); }
+.av-input:focus { border-color: var(--av-border-focus); }
+
+/* ── Divider ───────────────────────────────────────────── */
+.av-divider {
+  height: 1px;
+  background: var(--av-border);
+  margin: var(--av-gap-md) 0;
+}
+
+/* ── Status Dot ────────────────────────────────────────── */
+.av-dot {
+  width: 7px;
+  height: 7px;
+  border-radius: 50%;
+  flex-shrink: 0;
+}
+.av-dot-green   { background: var(--av-emerald); }
+.av-dot-crimson { background: var(--av-crimson); }
+.av-dot-amber   { background: var(--av-amber); }
+.av-dot-gray    { background: var(--av-text-muted); }
+
+/* Pulsing dot animation */
+.av-dot-green.av-pulse {
+  animation: av-pulse 2s ease-in-out infinite;
+}
+@keyframes av-pulse {
+  0%, 100% { box-shadow: 0 0 4px var(--av-emerald); }
+  50%       { box-shadow: 0 0 10px var(--av-emerald); }
+}
+
+/* ── Streaming / Loading indicator ────────────────────── */
+.av-streaming-dot {
+  display: inline-block;
+  width: 6px;
+  height: 6px;
+  border-radius: 50%;
+  background: var(--av-amber);
+  animation: av-blink 1.2s ease-in-out infinite;
+}
+@keyframes av-blink {
+  0%, 100% { opacity: 0.3; }
+  50%       { opacity: 1; }
+}
+
+/* ── Monospace code / diff text ────────────────────────── */
+.av-mono {
+  font-family: var(--av-font-mono);
+  font-size: var(--av-font-size-sm);
+  letter-spacing: 0.01em;
+}
+
+/* ── Diff line highlight ─────────────────────────────── */
+.av-diff-add {
+  background: var(--av-diff-added);
+  border-left: 2px solid var(--av-diff-added-border);
+  color: var(--av-emerald);
+}
+.av-diff-del {
+  background: var(--av-diff-removed);
+  border-left: 2px solid var(--av-diff-removed-border);
+  color: #EF4444;
+}
+
+/* ── Flow animation (for agent graph edges) ──────────── */
+@keyframes av-flow {
+  0%   { stroke-dashoffset: 60; }
+  100% { stroke-dashoffset: 0; }
+}
+
+/* ── Fade-in row animation ───────────────────────────── */
+@keyframes av-fadein {
+  from { opacity: 0; transform: translateY(4px); }
+  to   { opacity: 1; transform: translateY(0); }
+}
+.av-fadein { animation: av-fadein 200ms var(--av-ease) both; }
+
+/* ── Quick action chip (Explain | Fix | Refactor | Run) ── */
+.av-chip {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  padding: 4px 10px;
+  background: var(--av-bg-elevated);
+  border: 1px solid var(--av-border);
+  border-radius: 20px;
+  font-size: var(--av-font-size-sm);
+  color: var(--av-text-secondary);
+  cursor: pointer;
+  transition: background var(--av-duration) var(--av-ease),
+              border-color var(--av-duration) var(--av-ease),
+              color var(--av-duration) var(--av-ease);
+  user-select: none;
+}
+.av-chip:hover {
+  background: #1E2030;
+  border-color: #2D3148;
+  color: var(--av-text-heading);
+}
+
+/* ── Progress Bar ──────────────────────────────────────── */
+.av-progress {
+  height: 4px;
+  border-radius: 2px;
+  background: var(--av-bg-elevated);
+  overflow: hidden;
+}
+.av-progress-fill {
+  height: 100%;
+  border-radius: 2px;
+  background: var(--av-emerald);
+  transition: width 400ms var(--av-ease);
+}
+
+/* ── Panel toolbar ─────────────────────────────────────── */
+.av-toolbar {
+  display: flex;
+  align-items: center;
+  gap: var(--av-gap-xs);
+  padding: 0 var(--av-gap-sm);
+  height: 36px;
+  border-bottom: 1px solid var(--av-border);
+  background: var(--av-bg-panel);
+  flex-shrink: 0;
+}
+
+.av-toolbar-title {
+  font-size: var(--av-font-size-xs);
+  font-weight: 600;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: var(--av-text-muted);
+  flex: 1;
+}
+
+.av-toolbar-btn {
+  width: 24px;
+  height: 24px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: var(--av-radius-sm);
+  cursor: pointer;
+  color: var(--av-text-muted);
+  transition: background var(--av-duration) var(--av-ease),
+              color var(--av-duration) var(--av-ease);
+  border: none;
+  background: transparent;
+}
+.av-toolbar-btn:hover {
+  background: var(--av-bg-elevated);
+  color: var(--av-text-secondary);
+}
+
+/* ── Sign In Panel — matches reference card exactly ────── */
+.av-signin-panel {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: flex-start;
+  min-height: 100%;
+  padding: 20px 16px;
+  background: var(--av-bg-panel);
+  gap: 0;
+  overflow-y: auto;
+  overflow-x: auto;
+  box-sizing: border-box;
+}
+
+.av-signin-card {
+  width: 100%;
+  max-width: 340px;
+  background: #0E0F18;
+  border: 1px solid var(--av-border);
+  border-radius: var(--av-radius-lg);
+  padding: 28px 24px 24px;
+  display: flex;
+  flex-direction: column;
+  gap: var(--av-gap-md);
+}
+
+.av-signin-logo {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: var(--av-gap-sm);
+  margin-bottom: 8px;
+}
+
+.av-signin-logo-icon {
+  width: 32px;
+  height: 32px;
+  background: var(--av-crimson-alpha);
+  border: 1px solid var(--av-crimson-glow);
+  border-radius: var(--av-radius-md);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 16px;
+}
+
+.av-signin-logo-text {
+  font-size: 15px;
+  font-weight: 600;
+  color: var(--av-text-heading);
+}
+
+.av-signin-heading {
+  text-align: center;
+  font-size: 18px;
+  font-weight: 600;
+  color: var(--av-text-heading);
+  line-height: 1.3;
+}
+
+.av-signin-subtext {
+  text-align: center;
+  font-size: 12px;
+  color: var(--av-text-muted);
+  line-height: 1.6;
+}
+
+.av-signin-actions {
+  display: flex;
+  gap: var(--av-gap-sm);
+}
+
+.av-signin-actions .av-btn {
+  flex: 1;
+  font-family: var(--av-font-mono);
+  letter-spacing: 0.02em;
+}
+
+.av-signin-features {
+  display: flex;
+  justify-content: space-between;
+  gap: var(--av-gap-sm);
+  padding-top: var(--av-gap-sm);
+}
+
+.av-signin-feature {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 4px;
+}
+
+.av-signin-feature-label {
+  font-size: 11px;
+  font-weight: 600;
+  color: var(--av-text-primary);
+  text-align: center;
+}
+
+.av-signin-feature-sub {
+  font-size: 10px;
+  color: var(--av-text-muted);
+  text-align: center;
+}
+
+.av-signin-check {
+  color: var(--av-emerald);
+  font-size: 11px;
+}
+
+.av-signin-divider {
+  height: 1px;
+  background: var(--av-border);
+  margin: 0;
+}
+
+.av-signin-terms {
+  text-align: center;
+  font-size: 10px;
+  color: var(--av-text-muted);
+}
+
+.av-signin-terms a {
+  color: var(--av-text-link);
+  text-decoration: underline;
+  cursor: pointer;
+}
+
+/* ── Search / Command Palette feel ─────────────────────── */
+.av-search-bar {
+  display: flex;
+  align-items: center;
+  gap: var(--av-gap-sm);
+  background: var(--av-bg-elevated);
+  border: 1px solid var(--av-border);
+  border-radius: var(--av-radius-sm);
+  padding: 5px 10px;
+  transition: border-color var(--av-duration) var(--av-ease);
+}
+.av-search-bar:focus-within {
+  border-color: var(--av-border-focus);
+}
+.av-search-bar input {
+  background: transparent;
+  border: none;
+  outline: none;
+  color: var(--av-text-primary);
+  font-family: var(--av-font-ui);
+  font-size: var(--av-font-size-base);
+  flex: 1;
+}
+.av-search-bar input::placeholder { color: var(--av-text-muted); }
+
+/* ── Tooltip ────────────────────────────────────────────── */
+[title]:hover::after {
+  content: attr(title);
+  position: absolute;
+  bottom: calc(100% + 6px);
+  left: 50%;
+  transform: translateX(-50%);
+  background: var(--av-bg-elevated);
+  color: var(--av-text-primary);
+  font-size: var(--av-font-size-sm);
+  padding: 4px 8px;
+  border-radius: var(--av-radius-sm);
+  border: 1px solid var(--av-border);
+  white-space: nowrap;
+  pointer-events: none;
+  z-index: 9999;
+}

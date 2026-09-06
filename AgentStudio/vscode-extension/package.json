@@ -1,0 +1,357 @@
+{
+  "name": "nuuvixx-agentverse",
+  "displayName": "AgentVerse IDE",
+  "description": "Visual composer, debugger, and observability environment for AgentVerse agents.",
+  "version": "0.2.0",
+  "publisher": "nuuvixx",
+  "engines": {
+    "vscode": "^1.80.0"
+  },
+  "categories": [
+    "Other",
+    "Debuggers",
+    "AI"
+  ],
+  "extensionDependencies": [
+    "redhat.vscode-yaml"
+  ],
+  "activationEvents": [
+    "onLanguage:yaml",
+    "onView:agentverse.explorer",
+    "onView:agentverse.copilot",
+    "onView:agentverse.inspector",
+    "onView:agentverse.monitor",
+    "onView:agentverse.traces",
+    "onCommand:agentverse.runAgent",
+    "onCommand:agentverse.showGraph"
+  ],
+  "main": "./dist/extension.js",
+  "contributes": {
+    "commands": [
+      {
+        "command": "agentverse.runAgent",
+        "title": "AgentVerse: Run Agent",
+        "icon": "$(play)"
+      },
+      {
+        "command": "agentverse.showGraph",
+        "title": "AgentVerse: Show Agent Graph",
+        "icon": "$(type-hierarchy)"
+      },
+      {
+        "command": "agentverse.signIn",
+        "title": "AgentVerse: Sign In",
+        "icon": "$(account)"
+      },
+      {
+        "command": "agentverse.refreshExplorer",
+        "title": "AgentVerse: Refresh Explorer",
+        "icon": "$(refresh)"
+      },
+      {
+        "command": "agentverse.explorerOpenFolder",
+        "title": "AgentVerse: Open Folder",
+        "icon": "$(folder-opened)"
+      },
+      {
+        "command": "agentverse.newFile",
+        "title": "AgentVerse: New File",
+        "icon": "$(new-file)"
+      },
+      {
+        "command": "agentverse.newFolder",
+        "title": "AgentVerse: New Folder",
+        "icon": "$(new-folder)"
+      },
+      {
+        "command": "agentverse.deploy",
+        "title": "AgentVerse: Deploy to Cloud",
+        "icon": "$(cloud-upload)"
+      },
+      {
+        "command": "agentverse.publishToStore",
+        "title": "AgentVerse: Publish to Agent Store",
+        "icon": "$(package)"
+      },
+      {
+        "command": "agentverse.runRedTeamSuite",
+        "title": "AgentVerse: Red-Team Suite",
+        "icon": "$(shield)"
+      },
+      {
+        "command": "agentverse.remoteDebug",
+        "title": "AgentVerse: Remote Debugging",
+        "icon": "$(bug)"
+      },
+      {
+        "command": "agentverse.enterpriseDashboard",
+        "title": "AgentVerse: Enterprise Dashboard",
+        "icon": "$(organization)"
+      },
+      {
+        "command": "agentverse.showVisualizer",
+        "title": "AgentVerse: Swarm Visualizer",
+        "icon": "$(graph)"
+      },
+      {
+        "command": "agentverse.openStoreEditor",
+        "title": "AgentVerse: Open AgentStore in Main Workspace",
+        "icon": "$(screen-full)"
+      },
+      {
+        "command": "agentverse.openGovernEditor",
+        "title": "AgentVerse: Open GovernOS in Main Workspace",
+        "icon": "$(screen-full)"
+      },
+      {
+        "command": "agentverse.openInspectorEditor",
+        "title": "AgentVerse: Open Inspector in Main Workspace",
+        "icon": "$(screen-full)"
+      },
+      {
+        "command": "agentverse.openSettings",
+        "title": "AgentVerse: Open IDE Settings",
+        "icon": "$(settings-gear)"
+      }
+    ],
+    "menus": {
+      "commandCenter": [
+        {
+          "command": "agentverse.openSettings",
+          "group": "navigation@1"
+        }
+      ],
+      "editor/title": [
+        {
+          "command": "agentverse.openSettings",
+          "group": "navigation@0"
+        },
+        {
+          "command": "agentverse.runAgent",
+          "when": "resourceExtname == .yaml || resourceExtname == .yml",
+          "group": "navigation@1"
+        },
+        {
+          "command": "agentverse.showGraph",
+          "when": "resourceExtname == .yaml || resourceExtname == .yml",
+          "group": "navigation@2"
+        }
+      ],
+      "view/title": [
+        {
+          "command": "agentverse.openSettings",
+          "when": "view == agentverse.inspector || view == agentverse.explorer || view == agentverse.traces || view == agentverse.storeView",
+          "group": "navigation@0"
+        },
+        {
+          "command": "agentverse.openStoreEditor",
+          "when": "view == agentverse.storeView",
+          "group": "navigation@1"
+        },
+        {
+          "command": "agentverse.openGovernEditor",
+          "when": "view == agentverse.traces || view == agentverse.redteamView || view == agentverse.enterpriseView",
+          "group": "navigation@1"
+        },
+        {
+          "command": "agentverse.openInspectorEditor",
+          "when": "view == agentverse.inspector",
+          "group": "navigation@1"
+        },
+        {
+          "command": "agentverse.showGraph",
+          "when": "view == agentverse.inspector || view == agentverse.explorer",
+          "group": "navigation@2"
+        },
+        {
+          "command": "agentverse.newFile",
+          "when": "view == agentverse.explorer",
+          "group": "navigation@1"
+        },
+        {
+          "command": "agentverse.newFolder",
+          "when": "view == agentverse.explorer",
+          "group": "navigation@2"
+        },
+        {
+          "command": "agentverse.explorerOpenFolder",
+          "when": "view == agentverse.explorer && workspaceFolderCount == 0",
+          "group": "navigation@3"
+        },
+        {
+          "command": "agentverse.refreshExplorer",
+          "when": "view == agentverse.explorer",
+          "group": "navigation@4"
+        }
+      ],
+      "view/item/context": [
+        {
+          "command": "agentverse.runAgent",
+          "when": "view == agentverse.explorer && viewItem == agent",
+          "group": "inline"
+        }
+      ]
+    },
+    "keybindings": [
+      {
+        "command": "agentverse.runAgent",
+        "key": "ctrl+shift+r",
+        "mac": "cmd+shift+r",
+        "when": "resourceExtname == .yaml"
+      }
+    ],
+    "themes": [
+      {
+        "label": "AgentVerse Dark",
+        "uiTheme": "vs-dark",
+        "path": "./themes/theme.json"
+      }
+    ],
+    "viewsContainers": {
+      "activitybar": [
+        {
+          "id": "agentverse-govern",
+          "title": "AgentGovern",
+          "icon": "resources/govern.svg"
+        },
+        {
+          "id": "agentverse-store",
+          "title": "AgentStore",
+          "icon": "resources/store.svg"
+        },
+        {
+          "id": "agentverse-studio",
+          "title": "AgentStudio",
+          "icon": "resources/studio.svg"
+        }
+      ]
+    },
+    "views": {
+      "agentverse-govern": [
+        {
+          "id": "agentverse.traces",
+          "name": "GovernOS Traces & Audit",
+          "icon": "$(shield)",
+          "type": "webview"
+        },
+        {
+          "id": "agentverse.redteamView",
+          "name": "Red-Team Security Suite",
+          "icon": "$(shield-bug)",
+          "type": "webview"
+        },
+        {
+          "id": "agentverse.enterpriseView",
+          "name": "Enterprise Governance",
+          "icon": "$(organization)",
+          "type": "webview"
+        }
+      ],
+      "agentverse-store": [
+        {
+          "id": "agentverse.storeView",
+          "name": "AgentStore Marketplace",
+          "icon": "$(package)",
+          "type": "webview"
+        }
+      ],
+      "agentverse-studio": [
+        {
+          "id": "agentverse.explorer",
+          "name": "Workspace Agents",
+          "icon": "$(folder)",
+          "type": "tree"
+        },
+        {
+          "id": "agentverse.inspector",
+          "name": "Agent Inspector",
+          "icon": "$(circuit-board)",
+          "type": "webview"
+        },
+        {
+          "id": "agentverse.monitor",
+          "name": "Live Swarm Monitor",
+          "icon": "$(pulse)",
+          "type": "webview"
+        },
+        {
+          "id": "agentverse.signin",
+          "name": "Account & Auth",
+          "icon": "$(account)",
+          "type": "webview"
+        }
+      ]
+    },
+    "jsonValidation": [
+      {
+        "fileMatch": "agent.yaml",
+        "url": "./agent.yaml.schema.json"
+      }
+    ],
+    "yamlValidation": [
+      {
+        "fileMatch": "agent.yaml",
+        "url": "./agent.yaml.schema.json"
+      }
+    ],
+    "configuration": {
+      "title": "AgentVerse",
+      "properties": {
+        "agentverse.enabledModels": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          },
+          "default": [
+            "agentverse:gemma-3-27b:free",
+            "agentverse:llama-3.1-8b:free",
+            "agentverse:mistral-7b:free"
+          ],
+          "description": "Enabled AI models for AgentVerse Console and Inspector"
+        },
+        "agentverse.defaultModel": {
+          "type": "string",
+          "default": "agentverse:gemma-3-27b:free",
+          "description": "Default active AI model"
+        }
+      }
+    }
+  },
+  "scripts": {
+    "vscode:prepublish": "npm run package",
+    "compile": "webpack",
+    "watch": "webpack --watch",
+    "package": "webpack --mode production --devtool hidden-source-map",
+    "build-webview": "webpack --config webpack.webview.config.js --mode development",
+    "compile-tests": "tsc -p . --outDir out",
+    "watch-tests": "tsc -p . -w --outDir out",
+    "test": "node ./out/test/runTest.js"
+  },
+  "overrides": {
+    "serialize-javascript": "^7.1.1",
+    "diff": "^8.0.3"
+  },
+  "devDependencies": {
+    "@types/js-yaml": "^4.0.9",
+    "@types/mocha": "^10.0.10",
+    "@types/node": "20.x",
+    "@types/react": "^19.2.17",
+    "@types/react-dom": "^19.2.3",
+    "@types/vscode": "^1.80.0",
+    "@types/yaml": "^1.9.6",
+    "@vscode/test-electron": "^3.0.0",
+    "css-loader": "^7.1.4",
+    "mocha": "^11.8.0",
+    "style-loader": "^4.0.0",
+    "ts-loader": "^9.6.2",
+    "typescript": "^5.3.3",
+    "webpack": "^5.90.3",
+    "webpack-cli": "^5.1.4"
+  },
+  "dependencies": {
+    "@agentstudio/agent-core": "file:../../packages/agent-core",
+    "react": "^19.2.7",
+    "react-dom": "^19.2.7",
+    "yaml": "^2.3.4"
+  }
+}
