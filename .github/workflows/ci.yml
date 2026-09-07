@@ -1,0 +1,213 @@
+name: Continuous Integration
+
+on:
+  push:
+    branches: [ main, master, develop ]
+  pull_request:
+    branches: [ main, master, develop ]
+
+jobs:
+  python-lint-and-test:
+    name: Python Lint, Type Check & Unit Tests
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout Code
+        uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+          cache: "pip"
+
+      - name: Install Base Dev Dependencies
+        run: |
+          python -m pip install --upgrade pip
+          pip install ruff mypy pytest pytest-asyncio fakeredis httpx pyyaml
+
+      - name: Run Ruff Linter Across Ecosystem
+        run: |
+          ruff check AgentStore/backend AgentGovernOS/services AgentOS/services --exit-zero
+
+      - name: Run AgentStore Backend Tests
+        run: |
+          pip install -r AgentStore/backend/requirements.txt
+          python -m pytest AgentStore/backend/tests/ -v
+
+      - name: Run AgentGovernOS Governance API Tests
+        run: |
+          pip install -r AgentGovernOS/services/governance-api/requirements.txt
+          python -m pytest AgentGovernOS/services/governance-api/tests/ -v
+
+      - name: Run AgentOS Execution Plane Tests
+        run: |
+          pip install -r AgentOS/services/execution-plane/requirements.txt
+          python -m pytest AgentOS/services/execution-plane/tests/ -v
+
+  typescript-lint-and-check:
+    name: Frontend TypeScript & Lint Checks
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout Code
+        uses: actions/checkout@v4
+
+      - name: Set up Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: "20"
+          cache: "npm"
+          cache-dependency-path: "console/package-lock.json"
+
+      - name: Install Console Dependencies
+        run: |
+          cd console
+          npm ci || npm install
+
+      - name: Run Console Typecheck & Lint
+        run: |
+          cd console
+          npm run typecheck || npx tsc --noEmit
+          npm run lint || npx next lint
+
+
+  docker-build-check:
+    name: Docker Build Verification
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout Code
+        uses: actions/checkout@v4
+
+      - name: Validate Docker Compose Configs
+        run: |
+          docker compose config
+          docker compose -f docker-compose.yml -f docker-compose.prod.yml config
+
+      - name: Build Core Services
+        run: |
+          docker compose build agentstore-backend agentos-control-plane agentos-execution-plane agentgovernos-api
+
+  python-test-with-postgres:
+    name: Python Tests w/ Postgres + Redis Services
+    runs-on: ubuntu-latest
+    services:
+      postgres:
+        image: postgres:16-alpine
+        env:
+          POSTGRES_USER: postgres
+          POSTGRES_PASSWORD: postgres
+          POSTGRES_DB: agentverse
+        ports:
+          - 5432:5432
+        options: >-
+          --health-cmd "pg_isready -U postgres"
+          --health-interval 10s
+          --health-timeout 5s
+          --health-retries 5
+      redis:
+        image: redis:7-alpine
+        ports:
+          - 6379:6379
+        options: >-
+          --health-cmd "redis-cli ping"
+          --health-interval 10s
+          --health-timeout 5s
+          --health-retries 5
+
+    steps:
+      - name: Checkout Code
+        uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+          cache: "pip"
+
+      - name: Install Dependencies
+        run: |
+          python -m pip install --upgrade pip
+          pip install -r AgentStore/backend/requirements.txt -r AgentGovernOS/services/governance-api/requirements.txt
+          pip install pytest pytest-asyncio fakeredis
+
+      - name: Run Pytest Suite with Postgres & Redis
+        env:
+          DATABASE_URL: postgresql+asyncpg://postgres:postgres@localhost:5432/agentverse
+          REDIS_URL: redis://localhost:6379/0
+          APP_ENV: test
+        run: |
+          pytest AgentStore/backend/tests/ AgentGovernOS/services/governance-api/tests/ -v
+
+  integration-verification:
+    name: Full E2E System Integration Verification
+    runs-on: ubuntu-latest
+    needs: [python-lint-and-test, python-test-with-postgres, typescript-lint-and-check]
+
+    steps:
+      - name: Checkout Code
+        uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+
+      - name: Install Test Runner Dependencies
+        run: |
+          python -m pip install --upgrade pip
+          pip install httpx pyyaml pytest pytest-asyncio fakeredis python-dotenv
+
+      - name: Start Ecosystem Microservices via Docker Compose
+        run: |
+          docker compose up -d postgres redis agentstore-backend agentos-control-plane agentos-execution-plane agentgovernos-api
+
+      - name: Wait for Service Health (Readiness Probes)
+        run: |
+          echo "Waiting for services to become healthy..."
+          timeout=90
+          while [ $timeout -gt 0 ]; do
+            store=$(curl -s -o /dev/null -w "%{http_code}" http://localhost:8005/health || echo "000")
+            cp=$(curl -s -o /dev/null -w "%{http_code}" http://localhost:8010/health || echo "000")
+            ep=$(curl -s -o /dev/null -w "%{http_code}" http://localhost:8012/health || echo "000")
+            gov=$(curl -s -o /dev/null -w "%{http_code}" http://localhost:8025/health || echo "000")
+            if [ "$store" = "200" ] && [ "$cp" = "200" ] && [ "$ep" = "200" ] && [ "$gov" = "200" ]; then
+              echo "✓ All services healthy (Store: $store, CP: $cp, EP: $ep, Govern: $gov)"
+              break
+            fi
+            echo "Readiness probe: store=$store cp=$cp ep=$ep gov=$gov (retrying in 3s...)"
+            sleep 3
+            timeout=$((timeout-3))
+          done
+
+      - name: Run Strict End-to-End Bridge Verification
+        env:
+          STRICT_INTEGRATION: "1"
+          AGENTSTORE_URL: "http://localhost:8005"
+          CONTROL_PLANE_URL: "http://localhost:8010"
+          EXECUTION_PLANE_URL: "http://localhost:8012"
+          AGENTGOVERN_URL: "http://localhost:8025"
+        run: |
+          python verify_integration.py --strict
+
+      - name: Run Pytest Cross-Plane E2E Integration Suite
+        env:
+          STRICT_INTEGRATION: "1"
+          AGENTSTORE_URL: "http://localhost:8005"
+          CONTROL_PLANE_URL: "http://localhost:8010"
+          EXECUTION_PLANE_URL: "http://localhost:8012"
+          AGENTGOVERN_URL: "http://localhost:8025"
+        run: |
+          pytest tests/test_e2e_integration.py -v
+
+      - name: Dump Container Logs on Failure
+        if: failure()
+        run: |
+          echo "=== DUMPING DOCKER COMPOSE LOGS ON FAILURE ==="
+          docker compose logs --tail=100
+
+      - name: Teardown Services
+        if: always()
+        run: |
+          docker compose down -v

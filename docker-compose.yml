@@ -1,0 +1,219 @@
+services:
+  # ── 0. Primary PostgreSQL Service (Port 5432) ─────────────────────────────
+  postgres:
+    image: postgres:16-alpine
+    container_name: agentverse-postgres
+    environment:
+      - POSTGRES_DB=agentverse
+      - POSTGRES_USER=postgres
+      - POSTGRES_PASSWORD=${POSTGRES_PASSWORD:-postgres}
+    ports:
+      - "5432:5432"
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    networks:
+      - agentverse-net
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U postgres -d agentverse"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+  # ── 0b. Redis Service (Port 6379) ─────────────────────────────────────────
+  redis:
+    image: redis:7-alpine
+    container_name: agentverse-redis
+    ports:
+      - "6379:6379"
+    networks:
+      - agentverse-net
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+  # ── 1. AgentStore Backend (Port 8005) ──────────────────────────────────────
+  agentstore-backend:
+    build:
+      context: ./AgentStore/backend
+      dockerfile: Dockerfile
+    container_name: agentstore-backend
+    ports:
+      - "8005:8005"
+    environment:
+      - PORT=8005
+      - DATABASE_URL=${DATABASE_URL:-postgresql://postgres:${POSTGRES_PASSWORD:-postgres}@postgres:5432/agentverse}
+      - ALLOWED_ORIGINS=http://localhost:3051,http://127.0.0.1:3051,http://localhost:8050,http://127.0.0.1:8050,http://localhost:3000,http://127.0.0.1:3000
+      - SUPABASE_URL=${SUPABASE_URL}
+      - SUPABASE_SERVICE_ROLE_KEY=${SUPABASE_SERVICE_ROLE_KEY}
+    volumes:
+      - agentstore_data:/app/storage
+    depends_on:
+      postgres:
+        condition: service_healthy
+    networks:
+      - agentverse-net
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD", "python", "-c", "import urllib.request; urllib.request.urlopen('http://localhost:8005/health')"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 15s
+
+  # ── 2. AgentOS Control Plane (Port 8010) ──────────────────────────────────
+  agentos-control-plane:
+    build:
+      context: ./AgentOS/services/control-plane
+      dockerfile: Dockerfile
+    container_name: agentos-control-plane
+    ports:
+      - "8010:8010"
+    environment:
+      - PORT=8010
+      - DATABASE_URL=${DATABASE_URL:-postgresql+asyncpg://postgres:${POSTGRES_PASSWORD:-postgres}@postgres:5432/agentverse}
+      - SUPABASE_URL=${SUPABASE_URL}
+      - SUPABASE_SERVICE_ROLE_KEY=${SUPABASE_SERVICE_ROLE_KEY}
+      - JWT_SECRET_KEY=${SUPABASE_JWT_SECRET:-${JWT_SECRET_KEY}}
+      - GOVERNOS_URL=http://agentgovernos-api:8025
+      - AGENTSTORE_URL=http://agentstore-backend:8005
+      - EXECUTION_PLANE_URL=http://agentos-execution-plane:8012
+    depends_on:
+      postgres:
+        condition: service_healthy
+    networks:
+      - agentverse-net
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD", "python", "-c", "import urllib.request; urllib.request.urlopen('http://localhost:8010/health')"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 15s
+
+  # ── 3. AgentOS Execution Plane (Port 8012) ────────────────────────────────
+  agentos-execution-plane:
+    build:
+      context: ./AgentOS/services/execution-plane
+      dockerfile: Dockerfile
+    container_name: agentos-execution-plane
+    ports:
+      - "8012:8012"
+    environment:
+      - PORT=8012
+    networks:
+      - agentverse-net
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD", "python", "-c", "import urllib.request; urllib.request.urlopen('http://localhost:8012/health')"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 15s
+
+  # ── 4. AgentOS State Plane (Port 8014) ────────────────────────────────────
+  agentos-state-plane:
+    build:
+      context: ./AgentOS/services/state-plane
+      dockerfile: Dockerfile
+    container_name: agentos-state-plane
+    ports:
+      - "8014:8014"
+    environment:
+      - PORT=8014
+      - REDIS_URL=redis://redis:6379/0
+    depends_on:
+      redis:
+        condition: service_healthy
+    networks:
+      - agentverse-net
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD", "python", "-c", "import urllib.request; urllib.request.urlopen('http://localhost:8014/health')"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 15s
+
+  # ── 5. AgentGovernOS Governance API (Port 8025) ───────────────────────────
+  agentgovernos-api:
+    build:
+      context: ./AgentGovernOS/services/governance-api
+      dockerfile: Dockerfile
+    container_name: agentgovernos-api
+    ports:
+      - "8025:8025"
+    environment:
+      - PORT=8025
+      - APP_ENV=${APP_ENV:-development}
+      - DATABASE_URL=${DATABASE_URL:-postgresql+asyncpg://postgres:${POSTGRES_PASSWORD:-postgres}@postgres:5432/agentverse}
+      - REDIS_URL=redis://redis:6379/0
+      - JWT_SECRET_KEY=${SUPABASE_JWT_SECRET:-${JWT_SECRET_KEY}}
+      - SUPABASE_URL=${SUPABASE_URL}
+      - SUPABASE_SERVICE_ROLE_KEY=${SUPABASE_SERVICE_ROLE_KEY}
+      - ALLOWED_ORIGINS=http://localhost:3051,http://127.0.0.1:3051,http://localhost:3000,http://127.0.0.1:3000
+      - AGENTSTORE_URL=http://agentstore-backend:8005
+      - CONTROL_PLANE_URL=http://agentos-control-plane:8010
+      - RATE_LIMIT_ENABLED=true
+      - RATE_LIMIT_DEFAULT=100
+      - RATE_LIMIT_WINDOW_S=60
+    volumes:
+      - ./AgentGovernOS/services/governance-api:/app
+    depends_on:
+      postgres:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+    networks:
+      - agentverse-net
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD", "python", "-c", "import urllib.request; urllib.request.urlopen('http://localhost:8025/health')"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 20s
+
+
+  # ── 7. AgentVerse Master Console Frontend (Port 3051 host → 3000 container) ─
+  agentverse-console:
+    build:
+      context: ./console
+      dockerfile: Dockerfile
+    container_name: agentverse-console
+    ports:
+      - "3051:3000"
+    command: npx next dev -H 0.0.0.0 -p 3000
+    volumes:
+      - ./console:/app
+      - /app/node_modules
+      - /app/.next
+    environment:
+      - PORT=3000
+      - NEXT_PUBLIC_GOVERNANCE_API_URL=http://localhost:8025
+      - NEXT_PUBLIC_CONTROL_API_URL=http://localhost:8010
+      - NEXT_PUBLIC_STORE_API_URL=http://localhost:8005
+      - NEXT_PUBLIC_SUPABASE_URL=${NEXT_PUBLIC_SUPABASE_URL:-${SUPABASE_URL}}
+      - NEXT_PUBLIC_SUPABASE_ANON_KEY=${NEXT_PUBLIC_SUPABASE_ANON_KEY:-${SUPABASE_ANON_KEY}}
+      - OPENROUTER_API_KEY=${OPENROUTER_API_KEY}
+      - GEMINI_API_KEY=${GEMINI_API_KEY}
+      - CHUTES_API_KEY=${CHUTES_API_KEY:-}
+    depends_on:
+      agentgovernos-api:
+        condition: service_healthy
+      agentstore-backend:
+        condition: service_healthy
+    networks:
+      - agentverse-net
+    restart: unless-stopped
+
+networks:
+  agentverse-net:
+    driver: bridge
+
+volumes:
+  agentstore_data:
+  postgres_data:
